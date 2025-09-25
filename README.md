@@ -54,6 +54,8 @@ docker compose version
 ```
 docker compose up --build
 ```
+## На 9000 порту сидит graylog
+### Пароль и ник для захода admin admin
 
 ## Доступ к сервисам
 

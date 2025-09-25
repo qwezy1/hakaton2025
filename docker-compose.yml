@@ -32,5 +32,47 @@ services:
     ports:
       - "5433:5432"
 
+  # хранилка логов
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: opensearch
+    environment:
+      discovery.type: single-node
+      plugins.security.disabled: "true"
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - osdata:/usr/share/opensearch/data
+    ports:
+      - "9200:9200"
+
+  # метаданные для этой залупы
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    volumes:
+      - mongodata:/data/db
+
+  graylog:
+    image: graylog/graylog:5.2
+    container_name: graylog
+    environment:
+      GRAYLOG_PASSWORD_SECRET: somepasswordpepper
+      GRAYLOG_ROOT_PASSWORD_SHA2: 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+      GRAYLOG_HTTP_EXTERNAL_URI: http://localhost:9000/
+      GRAYLOG_ELASTICSEARCH_HOSTS: http://opensearch:9200
+      GRAYLOG_MONGODB_URI: mongodb://mongo:27017/graylog
+    depends_on:
+      - mongo
+      - opensearch
+    ports:
+      - "9000:9000" # сами логи на этом порту
+      - "12201:12201/udp" # залупа я хз че это
+
 volumes:
   pgdata:
+  osdata:
+  mongodata:
